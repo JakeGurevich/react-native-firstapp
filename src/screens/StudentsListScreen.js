@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import api from '../api/api';
 import axios from 'axios';
 import {
   FlatList,
@@ -11,24 +12,68 @@ import {
 
 const StudentsListScreen = () => {
   const [list, setList] = useState('');
-  const getStudents = async () => {
+  // const [token, setToken] = useState('');
+
+  function replacestr(str ,replace, raplacer ){
+    const newStr = str.replace(replace, raplacer)
+    console.log(`Old string : ${str}`)
+    console.log(`New string : ${newStr}`)
+    return newStr
+  }
+  function splitString(stringToSplit, separator) {
+    const arrayOfStrings = stringToSplit.split(separator)
+  
+    console.log('The original string is: ', stringToSplit)
+    console.log('The separator is: ', separator)
+    // console.log('The array has ', arrayOfStrings.length, ' elements: ', arrayOfStrings.join(' / '))
+    const arr = arrayOfStrings.map((array,i) => console.log(`Array ${i} : ${array}`))
+  }
+  
+  
+  
+  const space = ' '
+  const comma = '},'
+ const logIn = async()=>{
+ const res = await api.post('/datagate.php?type=login',{
+  email:"admin@email.com",
+  pass:"1234"
+})
+let tokenArr = res.data.split(',')
+let token = tokenArr[0].replace('{"token":','')
+token = token.replace(/\"/g,'')
+console.log(token)
+ getStudents(token)
+ }
+ 
+  const getStudents = async (tok) => {
     const data = {
       search: '',
       sorting: 'userid',
       desc: true,
       userstatus: 1,
       page: 0,
-      token: '11750dc91b6898b32cf0cfb09519f9e22bb4',
+      token:tok,
+      
+      
     };
+    console.log(data)
+    
     try {
-      const res = await axios.post(
-        'http://54.93.207.96/server/datagate.php?type=SearchNewUsers',
-        data,{ transformResponse: (r) => r }
+      const res = await api.post(
+        'datagate.php?type=SearchNewUsers',
+      data,
       );
-     console.log(res.headers,typeof res.data)
-     const resjson= JSON.parse(res.data)
-     console.log(resjson)
-      // setList(res.data);
+    //  console.log(res)
+    // const resjson= eval(res.data)
+    // const datajson = JSON.parse(resjson)
+    //  console.log(` raw data : ${resjson}`)
+    let newStr = replacestr(res.data,'{"users":','')
+    newStr =replacestr(newStr,'"pages":124}','')
+    console.log(typeof newStr)
+    splitString(newStr,comma)
+    //  const arr = JSON.parse(newStr)
+    //  console.log(arr)
+      setList(res.data);
     } catch (error) {
       {
         error;
@@ -36,10 +81,13 @@ const StudentsListScreen = () => {
     }
   };
   useEffect(() => {
-    getStudents();
-  });
+    logIn()
+   
+   
+  },[]);
   return (
     <View>
+     
       <Text>Students list{list}</Text>
       <FlatList
         keyExtractor={(item, index) => index.toString()}

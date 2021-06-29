@@ -13,18 +13,29 @@ import {
 
 const StudentsListScreen = () => {
   const [list, setList] = useState('');
+  // const [objNames, setObjNames] = useState([]);
+  // const [columnNames, setColumnNames] = useState([]);
   const [selectedHeaders, setSelectedHeaders] = useState([]);
   const [headers, setHeaders] = useState([
-    'First name',
-    'Last name',
-    'City',
-    'T.z.',
-    'Birthday',
-    'Email',
-    'User id',
-    'FN in arabic',
-    'LN in arabic',
-    'Religion name',
+    {columnName: 'First name', objName: 'firstname', isSelected: true},
+    {columnName: 'Last name', objName: 'lastname', isSelected: true},
+    {columnName: 'City', objName: 'cityname', isSelected: true},
+    {columnName: 'Phone', objName: 'phone', isSelected: false},
+    {columnName: 'Email', objName: 'email', isSelected: false},
+    {columnName: 'Birthday', objName: 'birthday', isSelected: false},
+    {
+      columnName: 'FN  in arabic',
+      objName: 'firstnameinarabic',
+      isSelected: false,
+    },
+    {
+      columnName: 'LN in arabic',
+      objName: 'lastnameinarabic',
+      isSelected: false,
+    },
+    {columnName: 'User id', objName: 'userid', isSelected: false},
+    {columnName: 'T.z.', objName: 'tznumber', isSelected: false},
+    {columnName: 'Religion name', objName: 'religionname', isSelected: false},
   ]);
 
   //{itemKey:columnName, firstName:First Name}
@@ -103,7 +114,7 @@ const StudentsListScreen = () => {
 
       let newStr = replacestr(res.data, '{"users":', '');
       newStr = replacestr(newStr, '"pages":124}', '');
-      console.log(res.data);
+
       const studentsList = splitString(newStr);
 
       setList(studentsList);
@@ -120,76 +131,80 @@ const StudentsListScreen = () => {
       }
     }
   };
-  const editHeader = item => {
-    console.log(item);
-    setSelectedHeaders([...selectedHeaders, item]);
+  const createSelectedHeaders = () => {
+    const filteredHeaders = headers.filter(item => item.isSelected === true);
+    setSelectedHeaders(filteredHeaders);
   };
+
+  const editHeaders = item => {
+    console.log(item);
+    const mapedHeaders = headers.map(header => {
+      return header.objName === item.objName
+        ? {...header, isSelected: !header.isSelected}
+        : {...header};
+    });
+    console.log(mapedHeaders);
+    setHeaders(mapedHeaders);
+  };
+  useEffect(() => {
+    createSelectedHeaders();
+  }, [headers]);
   useEffect(() => {
     logIn();
   }, []);
   return (
     <View style={{flex: 1}}>
       <View style={styles.headers}>
-        <FlatList
-          keyExtractor={(item, index) => index.toString()}
-          data={headers}
-          horizontal
-          renderItem={({item}) => (
+        {headers.map((item, index) => {
+          return (
             <TouchableOpacity
-              onPress={() => editHeader(item)}
+              key={index}
+              onPress={() => editHeaders(item)}
               style={styles.itemWrap}>
-              <Text style={styles.item}>{item}</Text>
+              <Text style={styles.item}>{item.columnName}</Text>
             </TouchableOpacity>
-          )}
-        />
+          );
+        })}
       </View>
-      <View style={styles.headers}>
+
+      <Text style={styles.h1}>{console.log(selectedHeaders)}</Text>
+      <Text style={styles.h1}>Students list</Text>
+      {/* <View style={styles.listHeader}>
         <FlatList
           keyExtractor={(item, index) => index.toString()}
           data={selectedHeaders}
           horizontal
           renderItem={({item}) => (
-            <TouchableOpacity
-              onPress={() => editHeader(item)}
-              style={styles.itemWrap}>
-              <Text style={styles.item}>{item}</Text>
-            </TouchableOpacity>
+            <>
+              <Text style={styles.headerRow}>{item.columnName}</Text>
+            </>
           )}
         />
-      </View>
-      <Text style={styles.h1}>Students list</Text>
-      <View style={styles.listHeader}>
-        <Text style={styles.headerRow}>First Name</Text>
-        <Text style={styles.headerRow}>Last Name</Text>
-        <Text style={styles.headerRow}>City</Text>
-        <Text style={styles.headerRow}>Phone</Text>
-      </View>
-      <ScrollView horizontal style={{width: '120%'}}>
+      
+      </View> */}
+      {/* <View style={styles.listWrapper}> */}
+      <ScrollView horizontal style={{width: '100%'}}>
         <ScrollView>
-          {list.map((item, i) => {
-            return (
-              <View key={i} style={styles.listWrapper}>
-                <Text style={styles.row}>{item.firstname}</Text>
-                <Text style={styles.row}>{item.lastname}</Text>
-                <Text style={styles.row}>{item.cityname}</Text>
-                <Text style={styles.row}>{item.phone}</Text>
-              </View>
-            );
-          })}
+          <View style={styles.listHeader}>
+            {selectedHeaders.map(header => {
+              return <Text style={styles.headerRow}>{header.columnName}</Text>;
+            })}
+          </View>
+          {list.length > 1 &&
+            list.map(item => {
+              return (
+                <View key={item.userid} style={styles.listWrapper}>
+                  {selectedHeaders.map(header => {
+                    return (
+                      <Text style={styles.row}>{item[header.objName]}</Text>
+                    );
+                  })}
+                </View>
+              );
+            })}
         </ScrollView>
       </ScrollView>
-      {/* <FlatList
-        keyExtractor={(item, index) => index.toString()}
-        data={list}
-        renderItem={({item}) => (
-          <View style={styles.listWrapper}>
-            <Text style={styles.row}>{item.firstname}</Text>
-            <Text style={styles.row}>{item.lastname}</Text>
-            <Text style={styles.row}>{item.cityname}</Text>
-            <Text style={styles.row}>{item.phone}</Text>
-          </View>
-        )}
-      /> */}
+      {/* </View> */}
     </View>
   );
 };
@@ -217,6 +232,7 @@ const styles = StyleSheet.create({
   headerRow: {
     flex: 1,
     fontSize: 20,
+    width: 100,
   },
   h1: {
     fontSize: 20,

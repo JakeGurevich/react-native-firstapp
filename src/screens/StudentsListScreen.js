@@ -8,6 +8,7 @@ import {
   StyleSheet,
   View,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 
 const StudentsListScreen = () => {
@@ -37,7 +38,14 @@ const StudentsListScreen = () => {
   function splitArray(arr, i) {
     let temp = arr.split(',')[i].split(':')[1].replace(/"/g, '');
     if (temp.includes('\\u')) {
-      temp = '{unicode}';
+      temp = '{UNICODE}';
+      // temp = temp.split('\\');
+      //   let arr = [];
+      //   for (let i = 1; i < temp.length - 1; i++) {
+      //     temp[i] = temp[i].replace('u', '\\u');
+      //     arr.push(temp[i]);
+      //   }
+      //   console.log(arr);
     }
     return temp;
   }
@@ -95,7 +103,7 @@ const StudentsListScreen = () => {
 
       let newStr = replacestr(res.data, '{"users":', '');
       newStr = replacestr(newStr, '"pages":124}', '');
-
+      console.log(res.data);
       const studentsList = splitString(newStr);
 
       setList(studentsList);
@@ -156,7 +164,21 @@ const StudentsListScreen = () => {
         <Text style={styles.headerRow}>City</Text>
         <Text style={styles.headerRow}>Phone</Text>
       </View>
-      <FlatList
+      <ScrollView horizontal style={{width: '120%'}}>
+        <ScrollView>
+          {list.map((item, i) => {
+            return (
+              <View key={i} style={styles.listWrapper}>
+                <Text style={styles.row}>{item.firstname}</Text>
+                <Text style={styles.row}>{item.lastname}</Text>
+                <Text style={styles.row}>{item.cityname}</Text>
+                <Text style={styles.row}>{item.phone}</Text>
+              </View>
+            );
+          })}
+        </ScrollView>
+      </ScrollView>
+      {/* <FlatList
         keyExtractor={(item, index) => index.toString()}
         data={list}
         renderItem={({item}) => (
@@ -167,10 +189,11 @@ const StudentsListScreen = () => {
             <Text style={styles.row}>{item.phone}</Text>
           </View>
         )}
-      />
+      /> */}
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   listHeader: {
     flexDirection: 'row',
@@ -180,6 +203,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   listWrapper: {
+    width: '100%',
     flexDirection: 'row',
     flexWrap: 'wrap',
     // backgroundColor: '',
@@ -189,7 +213,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     paddingLeft: 10,
   },
-  row: {flex: 1},
+  row: {flex: 1, width: 100},
   headerRow: {
     flex: 1,
     fontSize: 20,

@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://54.93.207.96/server/',
-  transformResponse: (r) => r
+  baseURL: 'http://54.93.207.96/server/'
+  
 
 //   transformResponse: [
 //     (data) => {
